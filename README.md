@@ -2,6 +2,10 @@
 
 This project is a simple web application built with Vite for interacting with an ERC20 token contract on the Goerli Test Network. The application allows users to mint and transfer ERC20 tokens.
 
+## Demo
+
+You can try out the live demo of the application [here](https://erc20.hameda169.ir).
+
 ## Features
 
 - Two-step form for minting and transferring ERC20 tokens.
@@ -20,7 +24,7 @@ Before running the project, make sure you have the following installed:
 
 1. Clone the repository: 
 ```bash
-git clone https://github.com/yourusername/erc20-token-management.git
+git clone https://github.com/hameda169/erc20-token-management.git
 ```
 
 2. Navigate into the project directory: 
@@ -48,4 +52,4 @@ yarn dev
 
 ## Configuration
 
-Make sure to replace the ERC20 token contract address in ```TODO``` with the actual address of your ERC20 token contract.
+Make sure to replace the ERC20 token contract data in ```/src/contract.json``` with the actual address of your ERC20 token contract.

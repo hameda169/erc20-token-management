@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Eip1193Provider, ethers } from 'ethers';
 import Contract from './contract.json';
 import './App.scss'
+import {Mint, Transfer} from './containers';
 
 async function getContract(): Promise<ethers.Contract> {
   const ethProvider = new ethers.BrowserProvider((window as unknown as { ethereum: Eip1193Provider }).ethereum);
@@ -9,66 +10,78 @@ async function getContract(): Promise<ethers.Contract> {
   return new ethers.Contract(Contract.address, Contract.abi, signer);
 }
 
+type RequestState =
+  | {state: 'INIT'; message?: undefined; error?: undefined}
+  | {state: 'LOADING'; message?: undefined; error?: undefined}
+  | {state: 'SUCCESS'; message: string; error?: undefined}
+  | {state: 'ERROR'; message?: undefined; error: string};
+
+type Stage = 'INIT' | 'MINT' | 'TRANSFER';
+
 function App() {
-  const [amount, setAmount] = useState<string>('');
-  const [recipient, setRecipient] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [mintedAmount, setMintedAmount] = useState<bigint>();
+  const [requestState, setRequestState] = useState<RequestState>({state: 'INIT'})
+  const [stage, setStage] = useState<Stage>('INIT')
 
-  const mintTokens = async () => {
+  const start = () => {
+    if((window as unknown as { ethereum: Eip1193Provider | null | undefined }).ethereum == null) {
+      setRequestState({state: 'ERROR', error: 'You don\'t have MetaMask wallet on your browser' });
+      return;
+    }
+    setStage('MINT');
+  }
+
+  const mintTokens = async (amount: number) => {
     try {
-      const numericAmount = Number(amount)
-      if (!Number.isNaN(numericAmount) && numericAmount <= 0) {
-        throw new Error('Invalid amount');
-      }
+      setRequestState({state: 'LOADING'});
 
+      const value = BigInt(amount*10**18)
       const tokenContract = await getContract();
-      const value = BigInt(numericAmount*10**18)
       const tx = await tokenContract.mint(value);
       await tx.wait();
-      setMessage('Tokens minted successfully');
+
+      setMintedAmount(value);
+      setRequestState({state: 'SUCCESS', message: 'Tokens minted successfully'});
+      setTimeout(() => {
+        setStage('TRANSFER');
+        setRequestState({state: 'INIT'})
+      }, 3000)
     } catch (err) {
       console.error(err);
-      setError('Error minting tokens');
+      setRequestState({state: 'ERROR', error: 'Error minting tokens'})
     }
   };
 
-  const transferTokens = async () => {
+  const transferTokens = async (recipient:string) => {
     try {
-      if (!recipient || !ethers.isAddress(recipient)) {
-        throw new Error('Invalid recipient address');
-      }
+      setRequestState({state: 'LOADING'});
 
       const tokenContract = await getContract();
-      const tx = await tokenContract.transfer(recipient, amount);
+      const tx = await tokenContract.transfer(recipient, mintedAmount);
       await tx.wait();
-      setMessage('Tokens transferred successfully');
+
+      setRequestState({state: 'SUCCESS', message: 'Tokens transferred successfully'});
+      setTimeout(() => {
+        setStage('INIT')
+        setRequestState({state: 'INIT'})
+      }, 3000);
     } catch (err) {
-      setError(`Error transferring tokens: ${(err as Error).message}`);
+      console.error(err);
+      setRequestState({state: 'ERROR', error: 'Error transferring tokens'})
     }
   };
 
   return (
     <div>
       <h1>Token Management</h1>
-      <div>
-        <h2>Step 1: Mint Tokens</h2>
-        <input type="text" value={amount} onChange={(e) => {
-          if(!Number.isNaN(Number(e.target.value))) {
-            setAmount(e.target.value);
-          }
-        }} />
-        <button onClick={mintTokens}>Mint Tokens</button>
-      </div>
-      <div>
-        <h2>Step 2: Transfer Tokens</h2>
-        <input type="text" value={recipient} onChange={(e) => setRecipient(e.target.value)} />
-        <button onClick={transferTokens}>Transfer Tokens</button>
-      </div>
-      {message && <p>{message}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {stage === 'INIT' ? <button onClick={start}>Click to Start</button>:null}
+      {stage === 'MINT' ? <Mint onSubmit={mintTokens}/>:null}
+      {stage === 'TRANSFER' && mintedAmount != null ? <Transfer mintedAmount={mintedAmount} onSubmit={transferTokens}/>:null}
+      {requestState.state === 'LOADING' ? 'Loading...' : null}
+      {requestState.state === 'SUCCESS' ? <p>{requestState.message}</p> : null}
+      {requestState.state === 'ERROR' ? <p style={{ color: 'red' }}>{requestState.error}</p> : null}
     </div>
   );
 }
 
-export default App
+export default App;
