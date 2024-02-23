@@ -1,2 +1,2 @@
-export {default as Mint} from './Mint.tsx';
-export {default as Transfer} from './Transfer.tsx';
+export { default as Mint } from './Mint.tsx';
+export { default as Transfer } from './Transfer.tsx';
