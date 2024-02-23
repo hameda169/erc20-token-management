@@ -1,0 +1,55 @@
+.input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  align-self: stretch;
+
+  input {
+    all: unset;
+    padding: 16px;
+    text-align: start;
+    background-color: #292929;
+    cursor: text;
+    color: #ABABAB;
+    align-self: stretch;
+    border-radius: 8px;
+
+    &:disabled {
+      background-color: #605f5f;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.button {
+  all: unset;
+  border-radius: 8px;
+  background-color: #EB2930;
+  padding: 8px 16px;
+  cursor: pointer;
+
+  &:disabled {
+    background-color: #ea787c;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled)  {
+    &:hover {
+      background-color: #c90812;
+    }
+  }
+}
+
+.paragraph {
+  align-self: stretch;
+  text-align: start;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 16px;
+}

@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Button, Form, TextInput } from '../components';
 
 interface Props {
   onSubmit: (amount: number) => void;
+  disabled: boolean;
 }
 
-function Mint({ onSubmit }: Props) {
+function Mint({ onSubmit, disabled }: Props) {
   const [amount, setAmount] = useState<string>('');
 
   const submit = () => {
@@ -16,19 +18,28 @@ function Mint({ onSubmit }: Props) {
   };
 
   return (
-    <div>
-      <h2>Step 1: Mint Tokens</h2>
-      <input
+    <Form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <TextInput
+        disabled={disabled}
         type='text'
         value={amount}
+        label='Amount'
+        placeholder='Enter amount'
         onChange={(e) => {
           if (!Number.isNaN(Number(e.target.value))) {
             setAmount(e.target.value);
           }
         }}
       />
-      <button onClick={submit}>Mint Tokens</button>
-    </div>
+      <Button disabled={disabled} type='submit'>
+        Mint Tokens
+      </Button>
+    </Form>
   );
 }
 

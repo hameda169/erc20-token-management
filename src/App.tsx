@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Eip1193Provider, ethers } from 'ethers';
 import Contract from './contract.json';
-import './App.scss';
 import { Mint, Transfer } from './containers';
+import { Button, Paragraph } from './components';
 
 async function getContract(): Promise<ethers.Contract> {
   const ethProvider = new ethers.BrowserProvider((window as unknown as { ethereum: Eip1193Provider }).ethereum);
@@ -74,14 +74,14 @@ function App() {
   return (
     <div>
       <h1>Token Management</h1>
-      {stage === 'INIT' ? <button onClick={start}>Click to Start</button> : null}
-      {stage === 'MINT' ? <Mint onSubmit={mintTokens} /> : null}
+      {stage === 'INIT' ? <Button onClick={start}>Click to Start</Button> : null}
+      {stage === 'MINT' ? <Mint disabled={requestState.state === 'LOADING'} onSubmit={mintTokens} /> : null}
       {stage === 'TRANSFER' && mintedAmount != null ? (
-        <Transfer mintedAmount={mintedAmount} onSubmit={transferTokens} />
+        <Transfer disabled={requestState.state === 'LOADING'} mintedAmount={mintedAmount} onSubmit={transferTokens} />
       ) : null}
-      {requestState.state === 'LOADING' ? 'Loading...' : null}
-      {requestState.state === 'SUCCESS' ? <p>{requestState.message}</p> : null}
-      {requestState.state === 'ERROR' ? <p style={{ color: 'red' }}>{requestState.error}</p> : null}
+      {requestState.state === 'LOADING' ? <Paragraph>Loading...</Paragraph> : null}
+      {requestState.state === 'SUCCESS' ? <Paragraph>{requestState.message}</Paragraph> : null}
+      {requestState.state === 'ERROR' ? <Paragraph style={{ color: 'red' }}>{requestState.error}</Paragraph> : null}
     </div>
   );
 }
